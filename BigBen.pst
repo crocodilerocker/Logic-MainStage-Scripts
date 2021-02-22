@@ -1,0 +1,75 @@
+/*This script was designed for LMTO's 2020 production of A Christmas Carol.
+
+It allows the performer to 'play' a chromatically mapped instrument 
+in a way that feels 'musical'. Any and all of the notes within the designated
+'playground' will trigger a note within the mapping range and iterate through it 
+step by step.
+
+The 'reset' note will always trigger the lowest note of that sample set,
+and restart the loop from there, allowing the performer to confidently 
+start/restart the phrase from the beginning.
+Ideally, this note should be outside the playground.
+*/
+
+var mappedNote = 36;
+var activeNotes = [];
+
+
+function HandleMIDI(event)
+{
+    var rangeMin = GetParameter('Playground Range Min');
+    var rangeMax = GetParameter('Playground Range Max');
+    var resetNote = GetParameter('Reset Note');
+    var startNote = GetParameter('Map Starting Note');
+    if ((event.pitch >= rangeMin && event.pitch <= rangeMax) || event.pitch == resetNote) {
+        if (event instanceof NoteOn) {
+            if (event.pitch == resetNote) {
+                mappedNote = startNote;
+            }
+            OnSendAndTrace(event);
+        } else if (event instanceof NoteOff) {
+            OffSendAndTrace(event);
+        }
+    }
+}
+
+function OnSendAndTrace(event) {
+	var currentNote = event.pitch;
+	event.pitch = mappedNote;
+	activeNotes[currentNote] = event.pitch;
+	MappedNoteLoop(event)
+	event.send();
+	event.trace();
+}
+
+function OffSendAndTrace(event) {
+	if (event.pitch in activeNotes) {
+	    var off = event.pitch;
+	    event.pitch = activeNotes[off];
+	    activeNotes[off] = null;
+	    event.trace();
+	    event.send();
+	}
+}
+
+function MappedNoteLoop(event)
+{
+	var start = GetParameter('Map Starting Note')
+	var samples = GetParameter('Samples')
+	
+    //Following line contributed by Roger Foxcroft http://www.github.com/rogerfoxcroft/
+	mappedNote = mappedNote + 1 >= start + samples ? start : mappedNote + 1;
+}
+
+var PluginParameters = [
+ 	{   name:'Map Starting Note', type:'menu', 
+ 		valueStrings:MIDI._noteNames, defaultValue:MIDI.noteNumber('C1'), numberOfSteps:100},
+ 	{   name:'Samples', type:'lin',
+	    minValue:0, maxValue:16, numberOfSteps:16, defaultValue:16},
+	{   name:'Reset Note', type:'menu', 
+ 		valueStrings:MIDI._noteNames, defaultValue:MIDI.noteNumber('F2'), numberOfSteps:100},
+	{   name:'Playground Range Min', type:'menu', 
+ 		valueStrings:MIDI._noteNames, defaultValue:MIDI.noteNumber('C3'), numberOfSteps:100},
+ 	{   name:'Playground Range Max', type:'menu', 
+ 		valueStrings:MIDI._noteNames, defaultValue:MIDI.noteNumber('C5'), numberOfSteps:100}
+];
