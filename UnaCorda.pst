@@ -3,8 +3,7 @@ Emulates una corda effect by decreasing velocities of notes played while
 soft pedal is depressed. User can select input CC and alter its effectiveness.
 */
 var on = 0;
-function HandleMIDI(event)
-{
+function HandleMIDI(event) {
 	var midicc = GetParameter('Una Corda');
 	var reduction = 100 - GetParameter('Strength');
 	if (event instanceof ControlChange && event.number == midicc)
@@ -19,8 +18,8 @@ function UnaCorda(num, red) {
 	return ((num - 1) * (red / 100)) + 1;
 }
 
-var PluginParameters = [
-	{	name:'Una Corda', type:"menu",
+var PluginParameters = [{	
+		name:'Una Corda', type:"menu",
 		valueStrings:MIDI._ccNames,
 		defaultValue:67},
 	{	name:'Strength', type:'lin',
