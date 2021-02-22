@@ -15,8 +15,7 @@ var mappedNote = 36;
 var activeNotes = [];
 
 
-function HandleMIDI(event)
-{
+function HandleMIDI(event) {
     var rangeMin = GetParameter('Playground Range Min');
     var rangeMax = GetParameter('Playground Range Max');
     var resetNote = GetParameter('Reset Note');
@@ -52,8 +51,7 @@ function OffSendAndTrace(event) {
 	}
 }
 
-function MappedNoteLoop(event)
-{
+function MappedNoteLoop(event) {
 	var start = GetParameter('Map Starting Note')
 	var samples = GetParameter('Samples')
 	
